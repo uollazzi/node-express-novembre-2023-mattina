@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import articoli from "./data";
 
 const port = 3000;
 const app = express();
@@ -25,7 +26,7 @@ app.use("/pluto", (req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-app.use(express.static("public"));
+app.use(express.static("./public"));
 
 app.get("/", (req: Request, res: Response) => {
     res.render("index", { pageTitle: "Home Page" });
@@ -62,6 +63,26 @@ app.get("/films/:id", (req: Request, res: Response) => {
     }
 
     res.send("Hai richiesto il film con id:" + idFilm);
+});
+
+app.get("/articoli/:id", (req: Request, res: Response) => {
+    const id = req.params["id"];
+    const idNumber = Number(id);
+
+    if (isNaN(idNumber)) {
+        res.status(400).send("Errore nella conversione dell'id in numero");
+        return;
+    }
+
+    // recupero l'articolo dal DB
+    const articolo = articoli.find(x => x.id == idNumber);
+
+    if (!articolo) {
+        res.status(404).send("Articolo non trovato.");
+        return;
+    }
+
+    res.render("articolo", { pageTitle: "Dettaglio Articolo", articolo: articolo });
 });
 
 app.get("/errore", (req: Request, res: Response) => {
